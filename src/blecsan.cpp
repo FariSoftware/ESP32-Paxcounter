@@ -146,6 +146,17 @@ IRAM_ATTR void gap_callback_handler(esp_gap_ble_cb_event_t event,
         break;
       }
 
+      uint8_t len;
+      uint8_t *data = esp_ble_resolve_adv_data(
+          p->scan_rst.ble_adv, ESP_BLE_AD_TYPE_16SRV_CMPL, &len);
+      if (len) {
+        if (len == 2 && data[0] == 0x6f && data[1] == 0xfd) {
+          ESP_LOGI(TAG);
+          ESP_LOGI(TAG, "YES!!!");
+          mac_has_en_enabled((uint8_t *)p->scan_rst.bda);
+        }
+      }
+
 #if (VENDORFILTER)
 
       if ((p->scan_rst.ble_addr_type == BLE_ADDR_TYPE_RANDOM) ||
@@ -159,17 +170,6 @@ IRAM_ATTR void gap_callback_handler(esp_gap_ble_cb_event_t event,
       // add this device and show new count total if it was not previously
       // added
       mac_add((uint8_t *)p->scan_rst.bda, p->scan_rst.rssi, MAC_SNIFF_BLE);
-
-      uint8_t len;
-      uint8_t *data = esp_ble_resolve_adv_data(
-          p->scan_rst.ble_adv, ESP_BLE_AD_TYPE_16SRV_CMPL, &len);
-      if (len) {
-        if (len == 2 && data[0] == 0x6f && data[1] == 0xfd) {
-          ESP_LOGI(TAG);
-          ESP_LOGI(TAG, "YES!!!");
-          mac_has_en_enabled((uint8_t *)p->scan_rst.bda);
-        }
-      }
 
       /* to be improved in vendorfilter if:
 
@@ -225,7 +225,7 @@ esp_err_t register_ble_callback(void) {
     .scan_type = BLE_SCAN_TYPE_ACTIVE,
     .own_addr_type = BLE_ADDR_TYPE_RANDOM,
 
-#if (VENDORFILTER)
+#if (VENDORFILTER && !ENCOUNTER)
     .scan_filter_policy = BLE_SCAN_FILTER_ALLOW_WLIST_PRA_DIR,
   // ADV_IND, ADV_NONCONN_IND, ADV_SCAN_IND packets are used for broadcasting
   // data in broadcast applications (e.g., Beacons), so we don't want them in
@@ -241,7 +241,7 @@ esp_err_t register_ble_callback(void) {
   };
 
 #if (VENDORFILTER)
-  ESP_LOGE(TAG, "Vendorfilter is enabled")
+  ESP_LOGI(TAG, "Vendorfilter is enabled");
 #endif
 
   ESP_LOGI(TAG, "Set GAP scan parameters");
