@@ -8,10 +8,17 @@ provided by Apple and Google.
 
 For general information cf. [PaxCounter](https://github.com/cyberman54/ESP32-Paxcounter)
 
+The code is currently not more than a proof-of-concept.
+
+The numbers returned by the code have not been validated for correctness.
+Also the code has not been optimized.
+
+Use at your own risk and do not blindly trust the data.
+
 	
 # License
 
-Copyright  2019 Matthias Spiller <matthias.spiller@fari-software.de>
+Copyright  2020 Matthias Spiller <matthias.spiller@fari-software.de>
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
