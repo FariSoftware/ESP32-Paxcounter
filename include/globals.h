@@ -117,6 +117,8 @@ typedef struct {
 } sdsStatus_t;
 
 extern std::set<uint16_t, std::less<uint16_t>, Mallocator<uint16_t>> macs;
+extern std::set<uint16_t, std::less<uint16_t>, Mallocator<uint16_t>>
+    en_enabled_macs;
 extern std::array<uint64_t, 0xff>::iterator it;
 extern std::array<uint64_t, 0xff> beacons;
 

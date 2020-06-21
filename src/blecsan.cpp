@@ -115,6 +115,7 @@ IRAM_ATTR void gap_callback_handler(esp_gap_ble_cb_event_t event,
            btsig_gap_type(*p->scan_rst.ble_adv));
 
   switch (event) {
+
   case ESP_GAP_BLE_SCAN_PARAM_SET_COMPLETE_EVT:
     // restart scan
     ESP_ERROR_CHECK(esp_ble_gap_start_scanning(BLESCANTIME));
@@ -155,12 +156,22 @@ IRAM_ATTR void gap_callback_handler(esp_gap_ble_cb_event_t event,
 
 #endif
 
-      // add this device and show new count total if it was not previously added
+      // add this device and show new count total if it was not previously
+      // added
       mac_add((uint8_t *)p->scan_rst.bda, p->scan_rst.rssi, MAC_SNIFF_BLE);
 
-      /* to be improved in vendorfilter if:
-      
+      uint8_t len;
+      uint8_t *data = esp_ble_resolve_adv_data(
+          p->scan_rst.ble_adv, ESP_BLE_AD_TYPE_16SRV_CMPL, &len);
+      if (len) {
+        if (len == 2 && data[0] == 0x6f && data[1] == 0xfd) {
+          ESP_LOGI(TAG);
+          ESP_LOGI(TAG, "YES!!!");
+          mac_has_en_enabled((uint8_t *)p->scan_rst.bda);
+        }
+      }
 
+      /* to be improved in vendorfilter if:
 
       // you can search for elements in the payload using the
       // function esp_ble_resolve_adv_data()
@@ -171,8 +182,8 @@ IRAM_ATTR void gap_callback_handler(esp_gap_ble_cb_event_t event,
       // uint8_t *data = esp_ble_resolve_adv_data(p->scan_rst.ble_adv,
       ESP_BLE_AD_TYPE_NAME_CMPL, &len);
 
-      filter BLE devices using their advertisements to get filter alternative to
-      vendor OUI if vendorfiltering is on, we ...
+      filter BLE devices using their advertisements to get filter alternative
+      to vendor OUI if vendorfiltering is on, we ...
       - want to count: mobile phones and tablets
       - don't want to count: beacons, peripherals (earphones, headsets,
       printers), cars and machines see
@@ -194,6 +205,10 @@ IRAM_ATTR void gap_callback_handler(esp_gap_ble_cb_event_t event,
     } // evaluate sniffed packet
     break;
 
+  case ESP_GAP_BLE_ADV_DATA_SET_COMPLETE_EVT:
+    ESP_LOGE(TAG, "Hier...");
+    break;
+
   default:
     break;
   }
@@ -207,7 +222,7 @@ esp_err_t register_ble_callback(void) {
   ESP_ERROR_CHECK(esp_ble_gap_register_callback(&gap_callback_handler));
 
   static esp_ble_scan_params_t ble_scan_params = {
-    .scan_type = BLE_SCAN_TYPE_PASSIVE,
+    .scan_type = BLE_SCAN_TYPE_ACTIVE,
     .own_addr_type = BLE_ADDR_TYPE_RANDOM,
 
 #if (VENDORFILTER)
@@ -220,9 +235,14 @@ esp_err_t register_ble_callback(void) {
 #endif
 
     .scan_interval =
-        (uint16_t)(cfg.blescantime * 10 / 0.625),    // Time = N * 0.625 msec
-    .scan_window = (uint16_t)(BLESCANWINDOW / 0.625) // Time = N * 0.625 msec
+        (uint16_t)(cfg.blescantime * 10 / 0.625),     // Time = N * 0.625 msec
+    .scan_window = (uint16_t)(BLESCANWINDOW / 0.625), // Time = N * 0.625 msec
+    .scan_duplicate = BLE_SCAN_DUPLICATE_DISABLE
   };
+
+#if (VENDORFILTER)
+  ESP_LOGE(TAG, "Vendorfilter is enabled")
+#endif
 
   ESP_LOGI(TAG, "Set GAP scan parameters");
 

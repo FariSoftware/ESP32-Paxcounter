@@ -43,6 +43,31 @@ uint64_t macConvert(uint8_t *paddr) {
   return (__builtin_bswap64(*mac) >> 16);
 }
 
+bool mac_has_en_enabled(uint8_t *paddr) {
+  if (!salt) // ensure we have salt (appears after radio is turned on)
+    return false;
+
+  char buff[10]; // temporary buffer for printf
+  bool added = false;
+  int8_t beaconID;    // beacon number in test monitor mode
+  uint16_t hashedmac; // temporary buffer for generated hash value
+  uint32_t *mac;      // temporary buffer for shortened MAC
+
+  // only last 3 MAC Address bytes are used for MAC address anonymization
+  // but since it's uint32 we take 4 bytes to avoid 1st value to be 0.
+  // this gets MAC in msb (= reverse) order, but doesn't matter for hashing it.
+  mac = (uint32_t *)(paddr + 2);
+  snprintf(buff, sizeof(buff), "%08X",
+           *mac + (uint32_t)salt); // convert unsigned 32-bit salted MAC
+                                   // to 8 digit hex string
+  hashedmac = rokkit(&buff[3], 5); // hash MAC 8 digit -> 5 digit
+  auto newmac =
+      en_enabled_macs.insert(hashedmac); // add hashed MAC, if new unique
+
+  ESP_LOGI(TAG, "Total macs: %d, enabled macs: %d", macs.size(),
+           en_enabled_macs.size());
+}
+
 bool mac_add(uint8_t *paddr, int8_t rssi, bool sniff_type) {
 
   if (!salt) // ensure we have salt (appears after radio is turned on)

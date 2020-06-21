@@ -151,7 +151,8 @@ uint32_t getFreeRAM() {
 
 void reset_counters() {
 #if ((WIFICOUNTER) || (BLECOUNTER))
-  macs.clear();   // clear all macs container
+  macs.clear(); // clear all macs container
+  en_enabled_macs.clear();
   macs_total = 0; // reset all counters
   macs_wifi = 0;
   macs_ble = 0;

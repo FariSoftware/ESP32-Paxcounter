@@ -94,6 +94,7 @@ timesource_t timeSource = _unsynced;
 // container holding unique MAC address hashes with Memory Alloctor using PSRAM,
 // if present
 std::set<uint16_t, std::less<uint16_t>, Mallocator<uint16_t>> macs;
+std::set<uint16_t, std::less<uint16_t>, Mallocator<uint16_t>> en_enabled_macs;
 
 // initialize payload encoder
 PayloadConvert payload(PAYLOAD_BUFFER_SIZE);
