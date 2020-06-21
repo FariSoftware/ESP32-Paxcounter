@@ -20,6 +20,7 @@
 // sniffing types
 #define MAC_SNIFF_WIFI 0
 #define MAC_SNIFF_BLE 1
+#define MAC_SNIFF_BLE_EN_ENABLED 2
 
 // bits in payloadmask for filtering payload data
 #define GPS_DATA (0x01)
@@ -82,6 +83,7 @@ typedef struct {
   char version[10];      // Firmware version
   uint8_t
       bsecstate[BSEC_MAX_STATE_BLOB_SIZE + 1]; // BSEC state for BME680 sensor
+  uint8_t exposure_notification_scan;          // 0=disabled, 1=enabled
 } configData_t;
 
 // Struct holding payload for data send queue

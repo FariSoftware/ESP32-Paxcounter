@@ -9,10 +9,10 @@ static const char TAG[] = "flash";
 nvs_handle my_handle;
 esp_err_t err;
 
-#define PAYLOADMASK                                  \
-  ((GPS_DATA | ALARM_DATA | MEMS_DATA | COUNT_DATA | \
-    SENSOR1_DATA | SENSOR2_DATA | SENSOR3_DATA) &    \
-   (~BATT_DATA) )
+#define PAYLOADMASK                                                            \
+  ((GPS_DATA | ALARM_DATA | MEMS_DATA | COUNT_DATA | SENSOR1_DATA |            \
+    SENSOR2_DATA | SENSOR3_DATA) &                                             \
+   (~BATT_DATA))
 
 // populate cfg vars with factory settings
 void defaultConfig() {
@@ -38,6 +38,7 @@ void defaultConfig() {
   cfg.payloadmask = PAYLOADMASK;   // all payload switched on
   cfg.bsecstate[BSEC_MAX_STATE_BLOB_SIZE] = {
       0}; // init BSEC state for BME680 sensor
+  cfg.exposure_notification_scan = ENCOUNTER; // 0=disabled, 1=enabled
 
   strncpy(cfg.version, PROGVERSION, sizeof(cfg.version) - 1);
 }
@@ -165,6 +166,10 @@ void saveConfig() {
     if (nvs_get_i16(my_handle, "rssilimit", &flash16) != ESP_OK ||
         flash16 != cfg.rssilimit)
       nvs_set_i16(my_handle, "rssilimit", cfg.rssilimit);
+
+    if (nvs_get_i8(my_handle, "encounter", &flash8) != ESP_OK ||
+        flash8 != cfg.exposure_notification_scan)
+      nvs_set_i8(my_handle, "encounter", cfg.exposure_notification_scan);
 
     err = nvs_commit(my_handle);
     nvs_close(my_handle);
@@ -356,6 +361,15 @@ void loadConfig() {
       ESP_LOGI(TAG, "Monitor mode = %d", flash8);
     } else {
       ESP_LOGI(TAG, "Monitor mode set to default %d", cfg.monitormode);
+      saveConfig();
+    }
+
+    if (nvs_get_i8(my_handle, "encounter", &flash8) == ESP_OK) {
+      cfg.exposure_notification_scan = flash8;
+      ESP_LOGI(TAG, "Exposure Notification = %d", flash8);
+    } else {
+      ESP_LOGI(TAG, "Exposure Notification set to default %d",
+               cfg.exposure_notification_scan);
       saveConfig();
     }
 

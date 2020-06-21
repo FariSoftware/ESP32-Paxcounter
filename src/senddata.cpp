@@ -84,6 +84,8 @@ void sendData() {
         payload.addCount(macs_wifi, MAC_SNIFF_WIFI);
       if (cfg.blescan)
         payload.addCount(macs_ble, MAC_SNIFF_BLE);
+      if (cfg.exposure_notification_scan)
+        payload.addCount(en_enabled_macs.size(), MAC_SNIFF_BLE_EN_ENABLED);
 #endif
 #if (HAS_GPS)
       if (GPSPORT == COUNTERPORT) {

@@ -265,7 +265,7 @@ void dp_drawPage(time_t t, bool nextpage) {
     else
       dp_printf("WIFI:off");
     if (cfg.blescan)
-      dp_printf(" BLTH:%-5d - %-5d", macs_ble, en_enabled_macs.size());
+      dp_printf(" BLTH:%-3d/%-3d", macs_ble, en_enabled_macs.size());
     else
       dp_printf(" BLTH:off");
 #elif ((WIFICOUNTER) && (!BLECOUNTER))
@@ -275,7 +275,7 @@ void dp_drawPage(time_t t, bool nextpage) {
       dp_printf("WIFI:off");
 #elif ((!WIFICOUNTER) && (BLECOUNTER))
     if (cfg.blescan)
-      dp_printf("BLTH:%-5d", macs_ble);
+      dp_printf("BLTH:%-5d / %-5d", macs_ble, en_enabled_macs.size());
     else
       dp_printf("BLTH:off");
 #else
